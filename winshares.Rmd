@@ -1,0 +1,104 @@
+---
+title: "Investigating the Winshares Statistic in the NBA"
+author: "Camden Weber"
+date: "2023-03-22"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+data <- read.csv('advanced_player_stats.csv')
+print(head(data))
+data <- data[-c(1,6,7,10,11,12,13,16,17,20,21,22,24,25,26,27)]
+head(data)
+dataflt <- data[c(5,6,7,8,9,10,11)]
+colnames(dataflt) <- c('PER', 'TSP', 'TRBP', 'ASTP', 'TOVP', 'USGP', 'WSP48')
+head(dataflt)
+```
+
+```{r}
+library(vtable)
+library(kableExtra)
+sumtable(dataflt)
+```
+
+```{r}
+library(corrplot)
+m <- cor(dataflt)
+corrplot(m, method="color")
+```
+
+```{r}
+print(hist(dataflt$PER))
+print(hist(dataflt$TSP))
+print(hist(dataflt$TRBP))
+print(hist(dataflt$ASTP))
+print(hist(dataflt$TOVP))
+print(hist(dataflt$USGP))
+print(hist(dataflt$WSP48))
+```
+
+
+
+
+```{r}
+pairs(dataflt)
+```
+
+```{r}
+m <- lm(WS.48.. ~ PER+TS.+TRB.+AST.+TOV.+USG., data = data)
+summary(m)
+anova(m)
+```
+
+```{r}
+m1 <- lm(WS.48.. ~ PER+TS.+AST.+TOV.+USG., data = data)
+summary(m1)
+anova(m1)
+library(caTools)
+library(car)
+vif(m1)
+plot(m1)
+```
+
+```{r}
+m11 <- lm(WS.48.. ~ TS.+AST.+TOV.+USG., data = data)
+summary(m11)
+anova(m11)
+vif(m11)
+```
+
+```{r}
+m2 <- lm(WS.48.. ~ PER+TS.+TOV.+USG., data = data)
+summary(m2)
+anova(m2)
+vif(m2)
+```
+
+```{r}
+m3 <- lm(WS.48.. ~ PER+TS.+USG., data = data)
+summary(m3)
+anova(m3)
+vif(m3)
+```
+
+
+
+```{r}
+backAIC <- step(m1, direction = "backward", data=dataflt)
+```
+
+```{r}
+backBIC <- step(m, direction = "backward", data=dataflt, k=log(190))
+```
+
+```{r}
+anova(m,m1)
+```
+
+
+
+
+
+
